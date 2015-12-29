@@ -45,7 +45,6 @@ Http.prototype.prepare = function () {
     app.use(bodyParser.raw());
 
     app.use(function (req, res, next) {
-        qw('GLOBAL', req.body)
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         next();
