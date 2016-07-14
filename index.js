@@ -3,7 +3,6 @@ var util = require('util');
 var express = require('express');
 var path = require('path');
 var engine = require('ejs-locals');
-var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 
@@ -15,7 +14,7 @@ function Http($config, Qw) {
     this.config = $config;
     if (!!$config.session) {
         qw('enabled shared sessionStore');
-        this.sessionStore = session({secret: $config.session.secret});
+        this.sessionStore = session($config.session);
     }
 
 }
