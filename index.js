@@ -11,7 +11,7 @@ var qw;
 function Http($config, Qw) {
     qw = Qw.log(this);
     this.app = null;
-    this.config = $config;
+    this.$config = $config;
     if (!!$config.session) {
         qw('enabled shared sessionStore');
         this.sessionStore = session($config.session);
@@ -24,14 +24,21 @@ util.inherits(Http, EventEmitter);
 Http.prototype.prepare = function () {
     var app = express();
 
-    var staticPath = path.join(__dirname, '../../http/static');
-    app.use(this.getStaticMiddleware('../../http/static'));
+    var cfg = this.$config;
+    var staticPath = cfg.pathToStatic ? path.join('..', cfg.pathToStatic) : '../../http/static';
+    if (!path.isAbsolute(staticPath)) {
+        staticPath = path.join(__dirname, staticPath);
+    }
+    app.use(this.getStaticMiddleware(staticPath));
     qw('static files path:', staticPath);
     app.set('static', staticPath);
-    var viewsPath = path.join(__dirname, '../../http/views');
+    var viewsPath = cfg.pathToViews ? path.join('..', cfg.pathToViews) : '../../http/views';
+    if (!path.isAbsolute(viewsPath)) {
+        viewsPath = path.join(__dirname, viewsPath);
+    }
     app.set('views', viewsPath);
     qw('views path:', viewsPath);
-    var uploadsPath = this.config.uploadDir;
+    var uploadsPath = this.$config.uploadDir;
     app.set('uploads', uploadsPath);
     qw('uploads path:', uploadsPath);
     app.engine('ejs', engine);
@@ -74,12 +81,12 @@ Http.prototype.getVar = function (varName) {
     return this.app.get(varName);
 };
 Http.prototype.pathToStatic = function (url) {
-    return path.join(this.config.uploadDir, url);
+    return path.join(this.$config.uploadDir, url);
 };
 Http.prototype.start = function () {
-    if (this.config.port) {
+    if (this.$config.port) {
         this.app.use(this.notFoundHandler);
-        this.app.listen(this.config.port, this.config.ipAddress);
+        this.app.listen(this.$config.port, this.$config.ipAddress);
     } else {
         throw Error('port is not set');
     }
